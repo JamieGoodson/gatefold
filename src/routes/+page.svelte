@@ -1,80 +1,100 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import mqtt from 'mqtt/dist/mqtt';
+	import mqtt, { MqttClient, type IClientOptions } from 'mqtt/dist/mqtt';
+	import Button from '$lib/components/Button.svelte';
 
 	interface Track {
+		id: string;
 		albumImages: string[];
 		artists: string[];
 		name: string;
 	}
 
 	enum Topic {
-		TrackId = 'raspotify/trackId'
+		TrackId = 'librespot/trackId'
 	}
 
-	// Demo track
-	// let track: Track = {
-	// 	albumImages: ['/steely-dan-cover.jpg'],
-	// 	artists: ['Steely Dan', 'Donald Fagen', 'Walter Becker'],
-	// 	name: 'Dirty Work'
-	// };
+	let testTrack: Track = {
+		id: '11dFghVXANMlKmJXsNCbNl',
+		albumImages: ['/steely-dan-cover.jpg'],
+		artists: ['Steely Dan', 'Donald Fagen', 'Walter Becker'],
+		name: 'Dirty Work'
+	};
 
+	const mqttBrokerUrl = import.meta.env.VITE_MQTT_BROKER_URL;
 	let track: Track | null;
 	let mainEl: HTMLElement | null;
+	let mqClient: MqttClient;
 
 	function goFullscreen() {
 		if (mainEl) mainEl.requestFullscreen();
 	}
 
+	function publishTestMessage() {
+		console.log(`Publishing test message to topic: ${Topic.TrackId}`);
+		mqClient.publish(Topic.TrackId, 'testTrackId');
+	}
+
 	onMount(() => {
 		mainEl = document.getElementById('main');
 
-		const mqClientId = 'mqttjs_' + Math.random().toString(16).substr(2, 8);
-		const mqOptions = {
-			keepalive: 60,
-			clientId: mqClientId,
-			protocolId: 'MQTT',
-			protocolVersion: 4,
-			clean: true,
-			reconnectPeriod: 1000,
-			connectTimeout: 30 * 1000
-		};
-		const mqClient = mqtt.connect('ws://broker.emqx.io:8083/mqtt', mqOptions);
+		const mqClientId = 'mqttjs_JamieGLibrespot';
+
+		console.log(
+			`Connecting to MQTT broker at ${
+				import.meta.env.VITE_MQTT_BROKER_URL
+			} with clientId ${mqClientId}`
+		);
+
+		mqClient = mqtt.connect(import.meta.env.VITE_MQTT_BROKER_URL, {
+			clientId: mqClientId
+		});
 
 		mqClient.on('connect', () => {
+			console.log(`Connected to MQTT broker`);
 			mqClient.subscribe(Topic.TrackId);
-
-			// Test
-			// mqClient.publish(Topic.TrackId, 'testTrackId');
 		});
 
 		mqClient.on('message', (topic, message) => {
-			console.log(topic);
 			console.log(message.toString());
 
 			switch (topic) {
 				case Topic.TrackId:
 					// TODO: Get track from spotify
+					track = testTrack;
 					break;
 				default:
 					console.error(`Unknown topic: ${topic}`);
 			}
-
-			mqClient.end();
 		});
 	});
 </script>
 
-<div on:click={() => goFullscreen()} class="w-full h-full flex gap-x-6 items-center justify-center">
+<div
+	on:click={() => goFullscreen()}
+	class="w-full h-full flex gap-x-6 items-center justify-center"
+>
 	{#if track}
 		<div class="flex w-1/2 justify-end">
-			<img class="w-full max-w-lg rounded-lg mb-2" src={track.albumImages[0]} alt="album cover" />
+			<img
+				class="w-full max-w-lg rounded-lg mb-2"
+				src={track.albumImages[0]}
+				alt="album cover"
+			/>
 		</div>
 		<div class="flex flex-col gap-y-4 w-1/2">
 			<div class="text-6xl font-extrabold">{track.name}</div>
-			<div class="text-neutral-400 text-2xl font-medium">{track.artists.join(', ')}</div>
+			<div class="text-neutral-400 text-2xl font-medium">
+				{track.artists.join(', ')}
+			</div>
 		</div>
 	{:else}
 		<div>No track</div>
 	{/if}
 </div>
+
+{#if import.meta.env.VITE_DEV_MODE}
+	<div class="absolute bottom-0 left-0 m-4" on:click={publishTestMessage}>
+		<Button label="Publish test message" />
+	</div>
+{/if}
