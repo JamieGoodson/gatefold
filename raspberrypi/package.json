@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "main.js",
-  "scripts": {},
+  "scripts": {
+    "dev": "DEV_MODE=true node ./main.js"
+  },
   "author": "",
   "license": "ISC",
   "dependencies": {

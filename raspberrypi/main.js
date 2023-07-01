@@ -1,12 +1,11 @@
 var mqtt = require('mqtt');
 var client = mqtt.connect('ws://broker.emqx.io:8083/mqtt');
-var devMode = true;
 
 client.on('connect', function () {
 	console.log('MQTT: connect');
 
 	var message;
-	if (devMode) {
+	if (process.env.DEV_MODE) {
 		message = {
 			playerEvent: 'start',
 			trackId: '2sCaihW0VlDKecbUgMSzRY'
@@ -20,5 +19,7 @@ client.on('connect', function () {
 	}
 
 	client.publish('librespot/playerEvent', JSON.stringify(message));
+	console.log('MQTT: published');
+	console.log(message);
 	client.end();
 });

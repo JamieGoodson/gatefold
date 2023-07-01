@@ -75,7 +75,7 @@
 			console.log(`MQTT: ${message}`);
 
 			if (!message || message == '{}') {
-				console.error('MQTT: Empty message. Aborting.');
+				console.warn('MQTT: Empty message. Ignoring...');
 				return;
 			}
 

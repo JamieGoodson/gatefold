@@ -1,38 +1,37 @@
-# create-svelte
+## Browser App
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/master/packages/create-svelte).
+The browser app uses a pub/sub model to listen for messages from the Raspberry Pi.
 
-## Creating a project
+### Prerequisites
 
-If you're seeing this, you've probably already done this step. Congrats!
+- Copy `.env.example` to `.env` and fill in the values.
+- Run `npm install`
 
-```bash
-# create a new project in the current directory
-npm create svelte@latest
+### Dev
 
-# create a new project in my-app
-npm create svelte@latest my-app
+- Run `npm run dev`
+
+### Production
+
+- Run `npm run build`
+- Serve preview via `npm run preview`
+
+## Raspberry Pi
+
+- cd `raspberrypi/`
+- Run `npm install`
+
+Add this to your raspotify config file:
+
+```
+OPTIONS="--onevent 'node ~/path/to/gatefold/raspberrypi/main.js'"
 ```
 
-## Developing
+### Dev
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+- Run `npm run dev` to publish a test message
 
-```bash
-npm run dev
+## Useful links
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
-
-## Building
-
-To create a production version of your app:
-
-```bash
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+- https://github.com/dtcooper/raspotify/issues/171#issuecomment-507423901
+- https://github.com/librespot-org/librespot/blob/aa880f8888226a8e5fc6e1e54dfb7cf58176ac95/src/player_event_handler.rs
