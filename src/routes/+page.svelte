@@ -4,13 +4,15 @@
 	import Button from '$lib/components/Button.svelte';
 	import { getAccessToken, getTrack, type Track } from '$lib/spotify';
 
-	enum Topic {
-		TrackId = 'librespot/trackId',
-		PlayerEvent = 'librespot/playerEvent'
-	}
-
 	type PlayerEvent = 'start' | 'stop' | 'change';
 
+	interface PlayerEventMessage {
+		playerEvent: PlayerEvent;
+		oldTrackId: string;
+		trackId: string;
+	}
+
+	const playerEventTopic = 'librespot/playerEvent';
 	const mqttBrokerUrl = import.meta.env.VITE_MQTT_BROKER_URL;
 	let currentTrack: Track | null;
 	let mainEl: HTMLElement | null;
@@ -20,9 +22,15 @@
 		if (mainEl) mainEl.requestFullscreen({ navigationUI: 'hide' });
 	}
 
-	function pubTestTrackId() {
-		console.log(`Publishing test message to topic: ${Topic.TrackId}`);
-		mqClient.publish(Topic.TrackId, '2sCaihW0VlDKecbUgMSzRY');
+	function pubTestPlayerEvent() {
+		console.log(`Publishing test message to topic: ${playerEventTopic}`);
+		mqClient.publish(
+			playerEventTopic,
+			JSON.stringify({
+				playerEvent: 'start',
+				trackId: '2sCaihW0VlDKecbUgMSzRY'
+			})
+		);
 	}
 
 	function setTestTrack() {
@@ -40,7 +48,7 @@
 
 		mqClient.on('connect', () => {
 			console.log('MQTT: connect');
-			mqClient.subscribe(Topic.TrackId);
+			mqClient.subscribe(playerEventTopic);
 		});
 
 		mqClient.on('disconnect', () => {
@@ -66,13 +74,21 @@
 			const message = messageRaw.toString();
 			console.log(`MQTT: ${message}`);
 
+			if (!message || message == '{}') {
+				console.error('MQTT: Empty message. Aborting.');
+				return;
+			}
+
 			switch (topic) {
-				case Topic.TrackId:
-					const trackId = message;
-					currentTrack = await getTrack(trackId, spotifyToken);
-					break;
-				case Topic.PlayerEvent:
-					const playerEvent = message as PlayerEvent;
+				case playerEventTopic:
+					const playerEventMessage = JSON.parse(message) as PlayerEventMessage;
+					if (playerEventMessage.playerEvent === 'stop') {
+						currentTrack = null;
+					} else {
+						const trackId = playerEventMessage.trackId;
+						currentTrack = await getTrack(trackId, spotifyToken);
+					}
+
 					break;
 				default:
 					console.error(`MQTT: Unknown topic: ${topic}`);
@@ -110,7 +126,7 @@
 
 {#if import.meta.env.VITE_DEV_MODE}
 	<div class="absolute bottom-0 left-0 m-4">
-		<Button on:click={pubTestTrackId} label="Publish Test Message" />
+		<Button on:click={pubTestPlayerEvent} label="Publish Test Message" />
 		<Button on:click={setTestTrack} label="Set Test Track" />
 	</div>
 {/if}
