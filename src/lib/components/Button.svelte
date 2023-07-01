@@ -2,6 +2,9 @@
 	export let label: string;
 </script>
 
-<button class="bg-white text-black py-2 px-5 rounded-full font-medium">
+<button
+	on:click
+	class="bg-white text-black py-3 px-6 rounded-full font-medium mx-2"
+>
 	{label}
 </button>

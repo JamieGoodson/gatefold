@@ -14,13 +14,6 @@
 		TrackId = 'librespot/trackId'
 	}
 
-	let testTrack: Track = {
-		id: '11dFghVXANMlKmJXsNCbNl',
-		albumImages: ['/steely-dan-cover.jpg'],
-		artists: ['Steely Dan', 'Donald Fagen', 'Walter Becker'],
-		name: 'Dirty Work'
-	};
-
 	const mqttBrokerUrl = import.meta.env.VITE_MQTT_BROKER_URL;
 	let track: Track | null;
 	let mainEl: HTMLElement | null;
@@ -30,9 +23,18 @@
 		if (mainEl) mainEl.requestFullscreen();
 	}
 
-	function publishTestMessage() {
+	function pubTestTrackId() {
 		console.log(`Publishing test message to topic: ${Topic.TrackId}`);
 		mqClient.publish(Topic.TrackId, 'testTrackId');
+	}
+
+	function setTestTrack() {
+		track = {
+			id: '11dFghVXANMlKmJXsNCbNl',
+			albumImages: ['/steely-dan-cover.jpg'],
+			artists: ['Steely Dan', 'Donald Fagen', 'Walter Becker'],
+			name: 'Dirty Work'
+		};
 	}
 
 	onMount(() => {
@@ -41,12 +43,10 @@
 		const mqClientId = 'mqttjs_JamieGLibrespot';
 
 		console.log(
-			`Connecting to MQTT broker at ${
-				import.meta.env.VITE_MQTT_BROKER_URL
-			} with clientId ${mqClientId}`
+			`Connecting to MQTT broker at ${mqttBrokerUrl} with clientId ${mqClientId}`
 		);
 
-		mqClient = mqtt.connect(import.meta.env.VITE_MQTT_BROKER_URL, {
+		mqClient = mqtt.connect(mqttBrokerUrl, {
 			clientId: mqClientId
 		});
 
@@ -61,7 +61,6 @@
 			switch (topic) {
 				case Topic.TrackId:
 					// TODO: Get track from spotify
-					track = testTrack;
 					break;
 				default:
 					console.error(`Unknown topic: ${topic}`);
@@ -88,13 +87,12 @@
 				{track.artists.join(', ')}
 			</div>
 		</div>
-	{:else}
-		<div>No track</div>
 	{/if}
 </div>
 
 {#if import.meta.env.VITE_DEV_MODE}
-	<div class="absolute bottom-0 left-0 m-4" on:click={publishTestMessage}>
-		<Button label="Publish test message" />
+	<div class="absolute bottom-0 left-0 m-4">
+		<Button on:click={pubTestTrackId} label="Publish Test Message" />
+		<Button on:click={setTestTrack} label="Set Test Track" />
 	</div>
 {/if}
