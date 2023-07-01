@@ -1,12 +1,15 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import mqtt, { MqttClient, type IClientOptions } from 'mqtt/dist/mqtt';
+	import mqtt, { MqttClient } from 'mqtt/dist/mqtt';
 	import Button from '$lib/components/Button.svelte';
-	import type { Track } from '$lib/spotify';
+	import { getAccessToken, getTrack, type Track } from '$lib/spotify';
 
 	enum Topic {
-		TrackId = 'librespot/trackId'
+		TrackId = 'librespot/trackId',
+		PlayerEvent = 'librespot/playerEvent'
 	}
+
+	type PlayerEvent = 'start' | 'stop' | 'change';
 
 	const mqttBrokerUrl = import.meta.env.VITE_MQTT_BROKER_URL;
 	let currentTrack: Track | null;
@@ -19,47 +22,68 @@
 
 	function pubTestTrackId() {
 		console.log(`Publishing test message to topic: ${Topic.TrackId}`);
-		mqClient.publish(Topic.TrackId, 'testTrackId');
+		mqClient.publish(Topic.TrackId, '2sCaihW0VlDKecbUgMSzRY');
 	}
 
 	function setTestTrack() {
 		currentTrack = {
-			id: '11dFghVXANMlKmJXsNCbNl',
+			id: '3IvTwPCCjfZczCN2k4qPiH',
 			albumImages: ['/steely-dan-cover.jpg'],
 			artists: ['Steely Dan', 'Donald Fagen', 'Walter Becker'],
 			name: 'Dirty Work'
 		};
 	}
 
-	onMount(() => {
-		mainEl = document.getElementById('main');
-
-		const mqClientId = 'mqttjs_JamieGLibrespot';
-
-		console.log(
-			`Connecting to MQTT broker at ${mqttBrokerUrl} with clientId ${mqClientId}`
-		);
-
-		mqClient = mqtt.connect(mqttBrokerUrl, {
-			clientId: mqClientId
-		});
+	function setupMqtt(spotifyToken: string) {
+		console.log(`Connecting to MQTT broker at ${mqttBrokerUrl}`);
+		mqClient = mqtt.connect(mqttBrokerUrl);
 
 		mqClient.on('connect', () => {
-			console.log(`Connected to MQTT broker`);
+			console.log('MQTT: connect');
 			mqClient.subscribe(Topic.TrackId);
 		});
 
-		mqClient.on('message', (topic, message) => {
-			console.log(message.toString());
+		mqClient.on('disconnect', () => {
+			console.log('MQTT: disconnect');
+		});
+
+		mqClient.on('offline', function () {
+			console.log('MQTT: offline');
+		});
+
+		mqClient.on('reconnect', function () {
+			console.log('MQTT: reconnect');
+		});
+
+		mqClient.on('error', (error) => {
+			console.log('MQTT: error');
+			console.error(error);
+		});
+
+		mqClient.on('message', async (topic, messageRaw) => {
+			console.log('MQTT: message');
+
+			const message = messageRaw.toString();
+			console.log(`MQTT: ${message}`);
 
 			switch (topic) {
 				case Topic.TrackId:
-					// TODO: Get track from spotify
+					const trackId = message;
+					currentTrack = await getTrack(trackId, spotifyToken);
+					break;
+				case Topic.PlayerEvent:
+					const playerEvent = message as PlayerEvent;
 					break;
 				default:
-					console.error(`Unknown topic: ${topic}`);
+					console.error(`MQTT: Unknown topic: ${topic}`);
 			}
 		});
+	}
+
+	onMount(async () => {
+		mainEl = document.getElementById('main');
+		const spotifyToken = await getAccessToken();
+		setupMqtt(spotifyToken);
 	});
 </script>
 
