@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import '../app.css';
 </script>
 
@@ -11,6 +11,6 @@
 	/>
 </svelte:head>
 
-<main class="p-6 h-screen">
+<main id="main" class="p-6 h-screen bg-neutral-900">
 	<slot />
 </main>
