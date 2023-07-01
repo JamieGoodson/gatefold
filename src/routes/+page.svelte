@@ -2,25 +2,19 @@
 	import { onMount } from 'svelte';
 	import mqtt, { MqttClient, type IClientOptions } from 'mqtt/dist/mqtt';
 	import Button from '$lib/components/Button.svelte';
-
-	interface Track {
-		id: string;
-		albumImages: string[];
-		artists: string[];
-		name: string;
-	}
+	import type { Track } from '$lib/spotify';
 
 	enum Topic {
 		TrackId = 'librespot/trackId'
 	}
 
 	const mqttBrokerUrl = import.meta.env.VITE_MQTT_BROKER_URL;
-	let track: Track | null;
+	let currentTrack: Track | null;
 	let mainEl: HTMLElement | null;
 	let mqClient: MqttClient;
 
 	function goFullscreen() {
-		if (mainEl) mainEl.requestFullscreen();
+		if (mainEl) mainEl.requestFullscreen({ navigationUI: 'hide' });
 	}
 
 	function pubTestTrackId() {
@@ -29,7 +23,7 @@
 	}
 
 	function setTestTrack() {
-		track = {
+		currentTrack = {
 			id: '11dFghVXANMlKmJXsNCbNl',
 			albumImages: ['/steely-dan-cover.jpg'],
 			artists: ['Steely Dan', 'Donald Fagen', 'Walter Becker'],
@@ -71,20 +65,20 @@
 
 <div
 	on:click={() => goFullscreen()}
-	class="w-full h-full flex gap-x-6 items-center justify-center"
+	class="w-full h-full flex gap-x-10 items-center justify-center"
 >
-	{#if track}
+	{#if currentTrack}
 		<div class="flex w-1/2 justify-end">
 			<img
-				class="w-full max-w-lg rounded-lg mb-2"
-				src={track.albumImages[0]}
+				class="w-full max-w-md rounded-lg mb-2"
+				src={currentTrack.albumImages[0]}
 				alt="album cover"
 			/>
 		</div>
 		<div class="flex flex-col gap-y-4 w-1/2">
-			<div class="text-6xl font-extrabold">{track.name}</div>
+			<div class="text-6xl font-extrabold">{currentTrack.name}</div>
 			<div class="text-neutral-400 text-2xl font-medium">
-				{track.artists.join(', ')}
+				{currentTrack.artists.join(', ')}
 			</div>
 		</div>
 	{/if}
