@@ -6,7 +6,7 @@ var brokerUrl = 'ws://broker.emqx.io:8083/mqtt';
 var client = mqtt.connect(brokerUrl);
 
 client.on('connect', function () {
-	console.log('MQTT: connect');
+	console.log('MQTT: Connected');
 
 	var message;
 	if (process.env.DEV_MODE) {
