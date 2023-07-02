@@ -44,7 +44,7 @@
 		};
 	}
 
-	async function onMessageHandler(message: string) {
+	async function onMqttMessageHandler(message: string) {
 		const playerEventMessage = JSON.parse(message) as PlayerEventMessage;
 		if (playerEventMessage.playerEvent === 'stop') {
 			currentTrack = null;
@@ -57,7 +57,7 @@
 	onMount(async () => {
 		mainEl = document.getElementById('main');
 		spotifyToken = await getAccessToken();
-		mqClient = setupMqtt(onMessageHandler);
+		mqClient = setupMqtt(onMqttMessageHandler);
 	});
 
 	afterUpdate(() => {
