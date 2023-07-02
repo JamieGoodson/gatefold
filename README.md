@@ -1,10 +1,11 @@
 ## Browser App
 
 The browser app uses a pub/sub model to listen for messages from the Raspberry Pi.
+It can be served either from the Raspberry Pi itself or anywhere.
 
 ### Prerequisites
 
-- Copy `.env.example` to `.env` and fill in the values.
+- Copy `.env.example` to `.env` and fill in the values. The MQTT values should match those in the raspotify script.
 - Run `npm install`
 
 ### Dev
@@ -16,10 +17,14 @@ The browser app uses a pub/sub model to listen for messages from the Raspberry P
 - Run `npm run build`
 - Serve preview via `npm run preview`
 
-## Raspberry Pi
+## Raspotify Script
 
-- cd `raspberrypi/`
+A node script that runs whenever the raspotify (librespot) event hook fires (eg when the raspotify player changed songs).
+This sends an event to the browser app to let it know that something happened.
+
+- cd `raspotify/`
 - Run `npm install`
+- Configure the `topic` and `brokerUrl` in `main.js`
 
 Add this to your raspotify config file:
 
@@ -29,7 +34,7 @@ OPTIONS="--onevent 'node ~/path/to/gatefold/raspberrypi/main.js'"
 
 ### Dev
 
-- Run `npm run dev` to publish a test message
+- Run `npm run dev` to publish a test event
 
 ## Useful links
 
