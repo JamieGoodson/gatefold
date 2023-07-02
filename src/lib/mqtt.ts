@@ -1,7 +1,13 @@
 import type { MqttClient } from 'mqtt';
 import mqtt from 'mqtt/dist/mqtt';
 
-type PlayerEvent = 'start' | 'stop' | 'change';
+type PlayerEvent =
+	| 'started'
+	| 'stopped'
+	| 'playing'
+	| 'changed'
+	| 'paused'
+	| 'volume_set';
 
 export interface PlayerEventMessage {
 	playerEvent: PlayerEvent;

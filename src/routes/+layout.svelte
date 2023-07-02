@@ -11,6 +11,6 @@
 	/>
 </svelte:head>
 
-<main id="main" class="p-6 h-screen bg-neutral-900">
+<main id="main" class="p-10 h-screen bg-neutral-900">
 	<slot />
 </main>

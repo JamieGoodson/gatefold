@@ -46,11 +46,16 @@
 
 	async function onMqttMessageHandler(message: string) {
 		const playerEventMessage = JSON.parse(message) as PlayerEventMessage;
-		if (playerEventMessage.playerEvent === 'stop') {
-			currentTrack = null;
-		} else {
-			const trackId = playerEventMessage.trackId;
-			currentTrack = await getTrack(trackId, spotifyToken);
+		const { playerEvent, trackId, oldTrackId } = playerEventMessage;
+
+		switch (playerEvent) {
+			case 'playing':
+				currentTrack = await getTrack(trackId, spotifyToken);
+				break;
+			case 'paused':
+			case 'stopped':
+				currentTrack = null;
+				break;
 		}
 	}
 
@@ -90,12 +95,12 @@
 			</div>
 		</div>
 
-		<canvas id="qr-code" class="absolute bottom-0 right-0 m-6" />
+		<canvas id="qr-code" class="absolute bottom-0 right-0 m-10 rounded" />
 	{/if}
 </div>
 
 {#if import.meta.env.VITE_DEV_MODE === 'true'}
-	<div class="absolute bottom-0 left-0 m-4">
+	<div class="absolute bottom-0 left-0 m-10">
 		<Button
 			on:click={() => publishTestPlayerEvent(mqClient)}
 			label="Publish Test Message"
