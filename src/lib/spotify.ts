@@ -3,6 +3,7 @@ export interface Track {
 	albumImages: string[];
 	artists: string[];
 	name: string;
+	url: string;
 }
 
 const clientId = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
@@ -56,6 +57,7 @@ export async function getTrack(id: string, token: string): Promise<Track> {
 		id,
 		albumImages: track.album.images.map(({ url }) => url),
 		artists: track.album.artists.map(({ name }) => name),
-		name: track.name
+		name: track.name,
+		url: track.external_urls.spotify
 	};
 }
