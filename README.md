@@ -58,7 +58,11 @@ You should see it publish a MQTT message on each event.
 
 ### Dev
 
-- Run `npm run dev` to publish a test event
+- Run `npm run dev` to publish a test event.
+
+If the browser app is configured and running correctly, you should see it display a track.
+If not, try opening the browser console and check if it's receiving any
+messages/showing any errors.
 
 ## Useful links
 
