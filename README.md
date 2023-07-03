@@ -1,12 +1,13 @@
-## Browser App
+## Web App
 
-The browser app uses a pub/sub model to listen for messages from the Raspberry Pi.
+The web app uses a pub/sub model to listen for messages from the Raspberry Pi.
 It can be served either from the Raspberry Pi itself or anywhere.
 
 TODO: Make a service to serve the app
 
 ### Prerequisites
 
+- From repo root: `cd webapp/`
 - Copy `.env.example` to `.env` and fill in the values. The MQTT values should match those in the Raspotify script.
 - Run `npm install`
 
@@ -32,7 +33,7 @@ This sends an event to the browser app to let it know that something happened.
 ### Part 1 - The event script
 
 - Ensure Node is installed system-wide on your Raspberry Pi (nvm won't do)
-- cd `raspotify/`
+- From repo root: `cd raspotify/`
 - Run `npm install`
 - Configure the `topic` and `brokerUrl` in `gatefold.js`
 
