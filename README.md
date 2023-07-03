@@ -17,11 +17,16 @@ TODO: Make a service to serve the app
 ### Production
 
 - Run `npm run build`
-- Serve preview via `npm run preview`
+- Run `node build/index.js`
+
+The server should now be running! 🎉
+
+Direct your device's browser to your Raspberry Pi's IP and port `3000`
+(or wherever you're hosting the app) to view Gatefold 🙂
 
 ## Raspotify Script
 
-A node script that lives on your Raspberry Pi and runs whenever the Raspotify (librespot) event hook fires (eg when the Raspotify player changed songs).
+A node script that lives on your Raspberry Pi and runs whenever the Raspotify (Librespot) event hook fires (eg when the Raspotify player changed songs).
 This sends an event to the browser app to let it know that something happened.
 
 ### Part 1 - The event script
@@ -52,9 +57,10 @@ Caution: Run at your own risk.
 Raspotify should now be sending out MQTT messages whenever you pause/play (etc) a track.
 You can confirm this by following the Raspotify logs in realtime:
 
-`sudo journalctl —follow -u raspotify`
+`sudo journalctl --follow -u raspotify`
 
-You should see it publish a MQTT message on each event.
+You should see it publish a MQTT message on each event. That's it! Your browser
+app should respond to these events.
 
 ### Dev
 

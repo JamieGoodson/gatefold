@@ -1,4 +1,4 @@
-import adapter from '@sveltejs/adapter-auto';
+import adapter from '@sveltejs/adapter-node';
 import { vitePreprocess } from '@sveltejs/kit/vite';
 
 /** @type {import('@sveltejs/kit').Config} */
@@ -14,10 +14,14 @@ const config = {
 		adapter: adapter()
 	},
 
-  onwarn: (warning, handler) => {
-    if (warning.code === 'a11y-click-events-have-key-events' || 'a11y-no-static-element-interactions') return
-    handler(warning)
-  },
+	onwarn: (warning, handler) => {
+		if (
+			warning.code === 'a11y-click-events-have-key-events' ||
+			'a11y-no-static-element-interactions'
+		)
+			return;
+		handler(warning);
+	}
 };
 
 export default config;

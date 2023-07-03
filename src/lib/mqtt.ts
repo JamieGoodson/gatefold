@@ -65,11 +65,11 @@ export function setupMqtt(
 
 export function publishTestPlayerEvent(client: MqttClient) {
 	console.log(`Publishing test message to topic: ${topic}`);
-	client.publish(
-		topic,
-		JSON.stringify({
-			playerEvent: 'start',
-			trackId: '2sCaihW0VlDKecbUgMSzRY'
-		})
-	);
+	const testPlayerEvent: PlayerEventMessage = {
+		playerEvent: 'playing',
+		trackId: '2sCaihW0VlDKecbUgMSzRY',
+		oldTrackId: ''
+	};
+
+	client.publish(topic, JSON.stringify(testPlayerEvent));
 }
