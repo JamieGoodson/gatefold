@@ -11,7 +11,7 @@ client.on('connect', function () {
 	var message;
 	if (process.env.DEV_MODE) {
 		message = {
-			playerEvent: 'start',
+			playerEvent: 'playing',
 			trackId: '2sCaihW0VlDKecbUgMSzRY'
 		};
 	} else {
