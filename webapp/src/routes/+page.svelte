@@ -11,7 +11,7 @@
 	import type { MqttClient } from 'mqtt';
 	import QRCode from 'qrcode';
 	import ColorThief from 'colorthief';
-	import { getFirstDarkColor } from '$lib/util';
+	import { getGradientColors, rgbColorToString } from '$lib/util';
 
 	const devMode = import.meta.env.VITE_DEV_MODE === 'true';
 
@@ -74,14 +74,16 @@
 				throw new Error('Could not get color palette for album image');
 			}
 
-			const bgColor = getFirstDarkColor(palette);
-			if (bgColor) {
-				const bgColorString = `rgb(${bgColor.join(',')})`;
-				mainEl.style.background = `linear-gradient(0deg, ${colors.neutral[900]}, ${bgColorString}`;
-			} else {
-				// Use a fallback color in case a suitable color could not be found
-				mainEl.style.background = colors.neutral[900];
-			}
+			const gradient = getGradientColors(palette);
+			const { brighterColor, darkerColor } = gradient;
+			const brigherColorString = brighterColor
+				? rgbColorToString(brighterColor)
+				: colors.neutral[700];
+			const darkerColorString = darkerColor
+				? rgbColorToString(darkerColor)
+				: colors.neutral[900];
+
+			mainEl.style.background = `linear-gradient(0deg, ${darkerColorString}, ${brigherColorString})`;
 		});
 	}
 
@@ -91,6 +93,7 @@
 
 		switch (playerEvent) {
 			case 'playing':
+			case 'changed':
 				const track = await getTrack(trackId, spotifyToken);
 				setCurrentTrack(track);
 				break;

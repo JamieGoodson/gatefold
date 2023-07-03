@@ -1,10 +1,34 @@
 import type { RGBColor } from 'colorthief';
 
-export function getFirstDarkColor(palette: RGBColor[]): RGBColor | null {
+export function getGradientColors(palette: RGBColor[]): {
+	brighterColor: RGBColor | null;
+	darkerColor: RGBColor | null;
+} {
+	let brighterColor = null;
+	let darkerColor = null;
+
 	for (const color of palette) {
-		const [r, g, b] = color;
-		if (r <= 80 && g <= 80 && b <= 80) return color;
+		if (!brighterColor) {
+			if (color.some((value) => value <= 180 && value >= 80)) {
+				brighterColor = color;
+				continue;
+			}
+		}
+
+		if (!darkerColor) {
+			if (color.every((value) => value < 70 && value > 30)) {
+				darkerColor = color;
+				continue;
+			}
+		}
 	}
 
-	return null;
+	return {
+		brighterColor,
+		darkerColor
+	};
+}
+
+export function rgbColorToString(color: RGBColor) {
+	return `rgb(${color.join(',')})`;
 }
