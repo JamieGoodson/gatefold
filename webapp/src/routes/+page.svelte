@@ -1,4 +1,5 @@
 <script lang="ts">
+	import colors from 'tailwindcss/colors';
 	import { afterUpdate, onMount } from 'svelte';
 	import Button from '$lib/components/Button.svelte';
 	import { getAccessToken, getTrack, type Track } from '$lib/spotify';
@@ -9,6 +10,10 @@
 	} from '$lib/mqtt';
 	import type { MqttClient } from 'mqtt';
 	import QRCode from 'qrcode';
+	import ColorThief from 'colorthief';
+	import { getFirstDarkColor } from '$lib/util';
+
+	const devMode = import.meta.env.VITE_DEV_MODE === 'true';
 
 	let mainEl: HTMLElement | null;
 
@@ -35,13 +40,49 @@
 	}
 
 	function setTestTrack() {
-		currentTrack = {
+		setCurrentTrack({
 			id: '3IvTwPCCjfZczCN2k4qPiH',
 			albumImages: ['/steely-dan-cover.jpg'],
 			artists: ['Steely Dan', 'Donald Fagen', 'Walter Becker'],
 			name: 'Dirty Work',
 			url: 'https://open.spotify.com/track/3IvTwPCCjfZczCN2k4qPiH'
-		};
+		});
+	}
+
+	function setCurrentTrack(track: Track | null) {
+		currentTrack = track;
+		setBackgroundColor(track);
+	}
+
+	async function setBackgroundColor(track: Track | null) {
+		if (!mainEl) return;
+		if (!track) {
+			mainEl.style.background = colors.black;
+			return;
+		}
+
+		const img = document.createElement('img');
+		img.crossOrigin = 'anonymous';
+		img.src = track.albumImages[0];
+		img.addEventListener('load', () => {
+			if (!mainEl) return;
+
+			const colorThief = new ColorThief();
+			const palette = colorThief.getPalette(img);
+
+			if (!palette) {
+				throw new Error('Could not get color palette for album image');
+			}
+
+			const bgColor = getFirstDarkColor(palette);
+			if (bgColor) {
+				const bgColorString = `rgb(${bgColor.join(',')})`;
+				mainEl.style.background = `linear-gradient(0deg, ${colors.neutral[900]}, ${bgColorString}`;
+			} else {
+				// Use a fallback color in case a suitable color could not be found
+				mainEl.style.background = colors.neutral[900];
+			}
+		});
 	}
 
 	async function onMqttMessageHandler(message: string) {
@@ -50,11 +91,12 @@
 
 		switch (playerEvent) {
 			case 'playing':
-				currentTrack = await getTrack(trackId, spotifyToken);
+				const track = await getTrack(trackId, spotifyToken);
+				setCurrentTrack(track);
 				break;
 			case 'paused':
 			case 'stopped':
-				currentTrack = null;
+				setCurrentTrack(null);
 				break;
 		}
 	}
@@ -63,6 +105,8 @@
 		mainEl = document.getElementById('main');
 		spotifyToken = await getAccessToken();
 		mqClient = setupMqtt(onMqttMessageHandler);
+
+		if (devMode) setTestTrack();
 	});
 
 	afterUpdate(() => {
@@ -77,7 +121,7 @@
 	{#if currentTrack}
 		<div class="flex w-1/2 justify-end">
 			<img
-				class="w-full max-w-md rounded-lg mb-2"
+				class="w-full max-w-md rounded-lg mb-2 shadow-md"
 				src={currentTrack.albumImages[0]}
 				alt="album cover"
 			/>
@@ -99,12 +143,13 @@
 	{/if}
 </div>
 
-{#if import.meta.env.VITE_DEV_MODE === 'true'}
+{#if devMode}
 	<div class="absolute bottom-0 left-0 m-10">
 		<Button
 			on:click={() => publishTestPlayerEvent(mqClient)}
 			label="Publish Test Message"
 		/>
 		<Button on:click={setTestTrack} label="Set Test Track" />
+		<Button on:click={() => setCurrentTrack(null)} label="Remove Track" />
 	</div>
 {/if}

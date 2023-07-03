@@ -9,5 +9,6 @@
       "a11y-click-events-have-key-events": "ignore",
       "a11y-no-static-element-interactions": "ignore",
     },
+    "prettier.prettierPath": "./webapp/node_modules/prettier"
   }
 }
