@@ -12,6 +12,7 @@
 	import QRCode from 'qrcode';
 	import ColorThief from 'colorthief';
 	import { getGradientColors, rgbColorToString } from '$lib/util';
+	import { setupWakeLock } from '$lib/wakeLock';
 
 	const devMode = import.meta.env.VITE_DEV_MODE === 'true';
 
@@ -111,6 +112,8 @@
 		mainEl = document.getElementById('main');
 		spotifyToken = await getAccessToken();
 		mqClient = setupMqtt(onMqttMessageHandler);
+
+		setupWakeLock();
 
 		if (devMode) setTestTrack();
 	});
