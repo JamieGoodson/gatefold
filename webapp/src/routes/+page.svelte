@@ -2,7 +2,7 @@
 	import colors from 'tailwindcss/colors';
 	import { afterUpdate, onDestroy, onMount } from 'svelte';
 	import Button from '$lib/components/Button.svelte';
-	import { getAccessToken, getTrack, type Track } from '$lib/spotify';
+	import { getTrack, type Track } from '$lib/spotify';
 	import {
 		publishTestPlayerEvent,
 		setupMqtt,
@@ -20,7 +20,6 @@
 
 	let isTrackPlaying = false;
 	let currentTrack: Track | null;
-	let spotifyToken: string;
 	let spotifyTokenInterval: NodeJS.Timer;
 	let mqClient: MqttClient;
 	let noSleep: NoSleep | null;
@@ -100,7 +99,7 @@
 			case 'playing':
 			case 'changed':
 				if (trackId !== currentTrack?.id) {
-					const track = await getTrack(trackId, spotifyToken);
+					const track = await getTrack(trackId);
 					setCurrentTrack(track);
 					setBackgroundColor(track);
 				}
@@ -115,14 +114,8 @@
 
 	onMount(async () => {
 		mainEl = document.getElementById('main');
-		spotifyToken = await getAccessToken();
 		mqClient = setupMqtt(onMqttMessageHandler);
 		noSleep = new NoSleep();
-
-		spotifyTokenInterval = setInterval(async () => {
-			console.log('Refreshing Spotify token');
-			spotifyToken = await getAccessToken();
-		}, ONE_HOUR - ONE_MINUTE);
 
 		if (devMode) setTestTrack();
 	});

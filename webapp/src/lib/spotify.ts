@@ -6,39 +6,27 @@ export interface Track {
 	url: string;
 }
 
+interface AccessToken {
+	token: string;
+	expiresAt: number;
+}
+
+const _accessToken: AccessToken | null = null;
 const clientId = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
 const clientSecret = import.meta.env.VITE_SPOTIFY_CLIENT_SECRET;
 const spotifyApiUrl = 'https://api.spotify.com/v1';
 
-export async function getAccessToken(): Promise<string> {
-	// https://developer.spotify.com/documentation/web-api/tutorials/client-credentials-flow
+const ONE_MINUTE = 60 * 1000;
 
-	const res = await fetch('https://accounts.spotify.com/api/token', {
-		method: 'POST',
-		headers: {
-			Authorization: `Basic ${btoa(`${clientId}:${clientSecret}`)}`,
-			'Content-Type': 'application/x-www-form-urlencoded'
-		},
-		body: new URLSearchParams({ grant_type: 'client_credentials' }).toString()
-	});
-
-	const resJson = await res.json();
-
-	if (!res.ok) {
-		console.error(resJson);
-		throw new Error('Spotify: Could not get access token');
-	}
-
-	return resJson.access_token as string;
-}
-
-export async function getTrack(id: string, token: string): Promise<Track> {
+export async function getTrack(id: string): Promise<Track> {
 	// https://developer.spotify.com/documentation/web-api/reference/get-track
 
 	console.log(`Spotify: Getting track by track ID ${id}`);
 
+	const accessToken = await getAccessToken();
+
 	const res = await fetch(`${spotifyApiUrl}/tracks/${id}`, {
-		headers: { Authorization: `Bearer ${token}` }
+		headers: { Authorization: `Bearer ${accessToken.token}` }
 	});
 
 	const resJson = await res.json();
@@ -60,4 +48,34 @@ export async function getTrack(id: string, token: string): Promise<Track> {
 		name: track.name,
 		url: track.external_urls.spotify
 	};
+}
+
+async function getAccessToken(): Promise<AccessToken> {
+	// https://developer.spotify.com/documentation/web-api/tutorials/client-credentials-flow
+
+	if (_accessToken && Date.now() < _accessToken.expiresAt) {
+		console.log('Spotify: Using cached access token');
+		return _accessToken;
+	}
+
+	console.log('Spotify: Refreshing access token');
+
+	const res = await fetch('https://accounts.spotify.com/api/token', {
+		method: 'POST',
+		headers: {
+			Authorization: `Basic ${btoa(`${clientId}:${clientSecret}`)}`,
+			'Content-Type': 'application/x-www-form-urlencoded'
+		},
+		body: new URLSearchParams({ grant_type: 'client_credentials' }).toString()
+	});
+
+	const resJson = await res.json();
+
+	if (!res.ok) {
+		console.error(resJson);
+		throw new Error('Spotify: Could not get access token');
+	}
+
+	const expiresAt = Date.now() + (resJson.expires_in * 1000 - ONE_MINUTE);
+	return { token: resJson.access_token, expiresAt };
 }
