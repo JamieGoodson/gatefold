@@ -151,7 +151,7 @@
 				</div>
 			</div>
 
-			<canvas id="qr-code" class="absolute bottom-0 right-0 m-10 rounded" />
+			<canvas id="qr-code" class="absolute bottom-0 right-0 m-10 rounded-lg" />
 		{/if}
 	</div>
 </main>
