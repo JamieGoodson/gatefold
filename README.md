@@ -1,4 +1,14 @@
-## Web App
+## Prerequisites
+Node >= v18.x (currently LTS) must be installed system-wide. To check your node version,
+run both `node -v` **and** `sudo node -v` (to confirm the same version for all users).
+
+If you don't have it installed, you can run:
+```
+curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+sudo apt install -y nodejs
+```
+
+## Part A - The Web App
 
 The web app uses a pub/sub model to listen for messages from the Raspberry Pi.
 It can be served either from the Raspberry Pi itself or anywhere.
@@ -25,7 +35,9 @@ The server should now be running! 🎉
 Direct your device's browser to your Raspberry Pi's IP and port `3000`
 (or wherever you're hosting the app) to view Gatefold 🙂
 
-## Raspotify Script
+For example `http://192.168.1.143:3000/`
+
+## Part B - The Raspotify Script
 
 A node script that lives on your Raspberry Pi and runs whenever the Raspotify (Librespot) event hook fires (eg when the Raspotify player changed songs).
 This sends an event to the browser app to let it know that something happened.

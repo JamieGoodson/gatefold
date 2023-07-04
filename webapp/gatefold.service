@@ -1,0 +1,13 @@
+[Unit]
+Description=Gatefold - A display for Raspotify
+Documentation=https://github.com/JamieGoodson/gatefold
+After=network.target
+
+[Service]
+Type=simple
+User=pi
+ExecStart=node /home/pi/projects/gatefold/webapp/build/index.js
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
