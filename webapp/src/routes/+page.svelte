@@ -12,7 +12,7 @@
 	import QRCode from 'qrcode';
 	import ColorThief from 'colorthief';
 	import { getGradientColors, rgbColorToString } from '$lib/util';
-	import { setupWakeLock } from '$lib/wakeLock';
+	import NoSleep from 'nosleep.js';
 
 	const devMode = import.meta.env.VITE_DEV_MODE === 'true';
 
@@ -22,6 +22,7 @@
 	let currentTrack: Track | null;
 	let spotifyToken: string;
 	let mqClient: MqttClient;
+	let noSleep: NoSleep | null;
 
 	function goFullscreen() {
 		if (mainEl) mainEl.requestFullscreen({ navigationUI: 'hide' });
@@ -112,8 +113,7 @@
 		mainEl = document.getElementById('main');
 		spotifyToken = await getAccessToken();
 		mqClient = setupMqtt(onMqttMessageHandler);
-
-		setupWakeLock();
+		noSleep = new NoSleep();
 
 		if (devMode) setTestTrack();
 	});
@@ -130,7 +130,10 @@
 		: 'opacity-0'}"
 >
 	<div
-		on:click={() => goFullscreen()}
+		on:click={() => {
+			goFullscreen();
+			if (noSleep && !noSleep.isEnabled) noSleep.enable();
+		}}
 		class="w-full h-full flex gap-x-10 items-center justify-center"
 	>
 		{#if currentTrack}
