@@ -1,6 +1,6 @@
 <script lang="ts">
 	import colors from 'tailwindcss/colors';
-	import { afterUpdate, onMount } from 'svelte';
+	import { afterUpdate, onDestroy, onMount } from 'svelte';
 	import Button from '$lib/components/Button.svelte';
 	import { getAccessToken, getTrack, type Track } from '$lib/spotify';
 	import {
@@ -21,8 +21,12 @@
 	let isTrackPlaying = false;
 	let currentTrack: Track | null;
 	let spotifyToken: string;
+	let spotifyTokenInterval: NodeJS.Timer;
 	let mqClient: MqttClient;
 	let noSleep: NoSleep | null;
+
+	const ONE_HOUR = 3600 * 1000;
+	const ONE_MINUTE = 60 * 1000;
 
 	function goFullscreen() {
 		if (mainEl) mainEl.requestFullscreen({ navigationUI: 'hide' });
@@ -115,11 +119,20 @@
 		mqClient = setupMqtt(onMqttMessageHandler);
 		noSleep = new NoSleep();
 
+		spotifyTokenInterval = setInterval(async () => {
+			console.log('Refreshing Spotify token');
+			spotifyToken = await getAccessToken();
+		}, ONE_HOUR - ONE_MINUTE);
+
 		if (devMode) setTestTrack();
 	});
 
 	afterUpdate(() => {
 		if (currentTrack) createTrackQrCode(currentTrack);
+	});
+
+	onDestroy(() => {
+		clearInterval(spotifyTokenInterval);
 	});
 </script>
 

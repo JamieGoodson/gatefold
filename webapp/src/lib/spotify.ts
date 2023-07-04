@@ -29,7 +29,7 @@ export async function getAccessToken(): Promise<string> {
 		throw new Error('Spotify: Could not get access token');
 	}
 
-	return (resJson as any).access_token as string;
+	return resJson.access_token as string;
 }
 
 export async function getTrack(id: string, token: string): Promise<Track> {
