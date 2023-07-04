@@ -17,6 +17,7 @@
 
 	let mainEl: HTMLElement | null;
 
+	let isTrackPlaying = false;
 	let currentTrack: Track | null;
 	let spotifyToken: string;
 	let mqClient: MqttClient;
@@ -40,26 +41,24 @@
 	}
 
 	function setTestTrack() {
-		setCurrentTrack({
+		const track: Track = {
 			id: '3IvTwPCCjfZczCN2k4qPiH',
 			albumImages: ['/steely-dan-cover.jpg'],
 			artists: ['Steely Dan', 'Donald Fagen', 'Walter Becker'],
 			name: 'Dirty Work',
 			url: 'https://open.spotify.com/track/3IvTwPCCjfZczCN2k4qPiH'
-		});
-	}
-
-	function setCurrentTrack(track: Track | null) {
-		currentTrack = track;
+		};
+		setCurrentTrack(track);
 		setBackgroundColor(track);
+		isTrackPlaying = true;
 	}
 
-	async function setBackgroundColor(track: Track | null) {
+	function setCurrentTrack(track: Track) {
+		currentTrack = track;
+	}
+
+	async function setBackgroundColor(track: Track) {
 		if (!mainEl) return;
-		if (!track) {
-			mainEl.style.background = colors.black;
-			return;
-		}
 
 		const img = document.createElement('img');
 		img.crossOrigin = 'anonymous';
@@ -94,12 +93,16 @@
 		switch (playerEvent) {
 			case 'playing':
 			case 'changed':
-				const track = await getTrack(trackId, spotifyToken);
-				setCurrentTrack(track);
+				if (trackId !== currentTrack?.id) {
+					const track = await getTrack(trackId, spotifyToken);
+					setCurrentTrack(track);
+					setBackgroundColor(track);
+				}
+				isTrackPlaying = true;
 				break;
 			case 'paused':
 			case 'stopped':
-				setCurrentTrack(null);
+				isTrackPlaying = false;
 				break;
 		}
 	}
@@ -117,34 +120,41 @@
 	});
 </script>
 
-<div
-	on:click={() => goFullscreen()}
-	class="w-full h-full flex gap-x-10 items-center justify-center"
+<main
+	id="main"
+	class="p-10 h-screen transition-all duration-500 {isTrackPlaying
+		? 'opacity-100'
+		: 'opacity-0'}"
 >
-	{#if currentTrack}
-		<div class="flex w-1/2 justify-end">
-			<img
-				class="w-full max-w-md rounded-lg mb-2 shadow-md"
-				src={currentTrack.albumImages[0]}
-				alt="album cover"
-			/>
-		</div>
-		<div class="flex flex-col gap-y-4 w-1/2">
-			<div
-				class="{currentTrack.name.length > 30
-					? 'text-5xl'
-					: 'text-6xl'} font-extrabold"
-			>
-				{currentTrack.name}
+	<div
+		on:click={() => goFullscreen()}
+		class="w-full h-full flex gap-x-10 items-center justify-center"
+	>
+		{#if currentTrack}
+			<div class="flex w-1/2 justify-end">
+				<img
+					class="w-full max-w-md rounded-lg mb-2 shadow-md"
+					src={currentTrack.albumImages[0]}
+					alt="album cover"
+				/>
 			</div>
-			<div class="text-neutral-400 text-2xl font-medium">
-				{currentTrack.artists.join(', ')}
+			<div class="flex flex-col gap-y-4 w-1/2">
+				<div
+					class="{currentTrack.name.length > 30
+						? 'text-5xl'
+						: 'text-6xl'} font-extrabold"
+				>
+					{currentTrack.name}
+				</div>
+				<div class="text-neutral-300 text-2xl font-medium">
+					{currentTrack.artists.join(', ')}
+				</div>
 			</div>
-		</div>
 
-		<canvas id="qr-code" class="absolute bottom-0 right-0 m-10 rounded" />
-	{/if}
-</div>
+			<canvas id="qr-code" class="absolute bottom-0 right-0 m-10 rounded" />
+		{/if}
+	</div>
+</main>
 
 {#if devMode}
 	<div class="absolute bottom-0 left-0 m-10">
@@ -152,7 +162,12 @@
 			on:click={() => publishTestPlayerEvent(mqClient)}
 			label="Publish Test Message"
 		/>
-		<Button on:click={setTestTrack} label="Set Test Track" />
-		<Button on:click={() => setCurrentTrack(null)} label="Remove Track" />
+		<Button on:click={setTestTrack} label="Simulate Test Track Played" />
+		<Button
+			on:click={() => {
+				isTrackPlaying = false;
+			}}
+			label="Simulate Track Stopped"
+		/>
 	</div>
 {/if}
