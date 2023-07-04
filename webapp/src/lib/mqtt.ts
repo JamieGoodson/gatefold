@@ -38,7 +38,7 @@ export function setupMqtt(
 	});
 
 	client.on('reconnect', function () {
-		console.log('MQTT: Reconnected');
+		console.log('MQTT: Reconnecting...');
 	});
 
 	client.on('error', (error) => {
