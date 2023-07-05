@@ -1,8 +1,14 @@
+# Gatefold - A Display For Raspotify
+
+<img src="https://github.com/JamieGoodson/gatefold/assets/4729966/74e448fe-f04d-4e6f-b665-45d1faf62c67" width="600">
+
 ## Prerequisites
+
 Node >= v18.x (currently LTS) must be installed system-wide. To check your node version,
 run both `node -v` **and** `sudo node -v` (to confirm the same version for all users).
 
 If you don't have it installed, you can run:
+
 ```
 curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
 sudo apt install -y nodejs
@@ -10,10 +16,9 @@ sudo apt install -y nodejs
 
 ## Part A - The Web App
 
-The web app uses a pub/sub model to listen for messages from the Raspberry Pi.
-It can be served either from the Raspberry Pi itself or anywhere.
-
-TODO: Make a service to serve the app
+The web app is what displays the track info. It uses a pub/sub model to listen for messages
+from the Raspberry Pi/Raspotify. It can be served either from the Raspberry Pi itself
+or anywhere.
 
 ### Prerequisites
 
@@ -31,6 +36,22 @@ TODO: Make a service to serve the app
 - Run `node build/index.js`
 
 The server should now be running! 🎉
+
+Direct your device's browser to your Raspberry Pi's IP and port `3000`
+(or wherever you're hosting the app) to view Gatefold 🙂
+
+For example `http://192.168.1.143:3000/`
+
+### Run as a service (recommended)
+
+To keep the app running forever, it's best to run Gatefold as a service on the Raspberry Pi. To do this:
+
+- Run `npm run build`
+- Edit the `ExecStart` path to point to the right place (ie the full path to this directory + `/build/index.js`)
+- Run `cp gatefold.service /lib/systemd/system/`
+- Run `sudo systemctl start gatefold`
+
+This will start the Gatefold service and run in the background. It'll also start automatically on system startup.
 
 Direct your device's browser to your Raspberry Pi's IP and port `3000`
 (or wherever you're hosting the app) to view Gatefold 🙂
