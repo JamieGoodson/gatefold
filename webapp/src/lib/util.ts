@@ -9,14 +9,14 @@ export function getGradientColors(palette: RGBColor[]): {
 
 	for (const color of palette) {
 		if (!brighterColor) {
-			if (color.some((value) => value <= 180 && value >= 80)) {
+			if (color.some((value) => value <= 160 && value >= 70)) {
 				brighterColor = color;
 				continue;
 			}
 		}
 
 		if (!darkerColor) {
-			if (color.every((value) => value < 70 && value > 30)) {
+			if (color.every((value) => value < 70)) {
 				darkerColor = color;
 				continue;
 			}

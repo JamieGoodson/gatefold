@@ -26,6 +26,7 @@
 
 	const ONE_HOUR = 3600 * 1000;
 	const ONE_MINUTE = 60 * 1000;
+	const BG_FALLBACK_COLOR = colors.neutral[900];
 
 	function goFullscreen() {
 		if (mainEl) mainEl.requestFullscreen({ navigationUI: 'hide' });
@@ -81,10 +82,10 @@
 			const { brighterColor, darkerColor } = gradient;
 			const brigherColorString = brighterColor
 				? rgbColorToString(brighterColor)
-				: colors.neutral[700];
+				: BG_FALLBACK_COLOR;
 			const darkerColorString = darkerColor
 				? rgbColorToString(darkerColor)
-				: colors.neutral[900];
+				: BG_FALLBACK_COLOR;
 
 			mainEl.style.background = `linear-gradient(0deg, ${darkerColorString}, ${brigherColorString})`;
 		});
