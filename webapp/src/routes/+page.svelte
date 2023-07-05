@@ -16,11 +16,11 @@
 
 	const devMode = import.meta.env.VITE_DEV_MODE === 'true';
 
-	let mainEl: HTMLElement | null;
+	let mainEl: HTMLElement;
+	let canvasEl: HTMLCanvasElement;
 
 	let isTrackPlaying = false;
 	let currentTrack: Track | null;
-	let spotifyTokenInterval: NodeJS.Timer;
 	let mqClient: MqttClient;
 	let noSleep: NoSleep | null;
 
@@ -34,7 +34,6 @@
 	async function createTrackQrCode(track: Track) {
 		console.log('Creating QR code');
 
-		const canvasEl = document.getElementById('qr-code');
 		try {
 			await QRCode.toCanvas(canvasEl, track.url, { scale: 3 });
 		} catch (error) {
@@ -113,7 +112,6 @@
 	}
 
 	onMount(async () => {
-		mainEl = document.getElementById('main');
 		mqClient = setupMqtt(onMqttMessageHandler);
 		noSleep = new NoSleep();
 
@@ -123,17 +121,13 @@
 	afterUpdate(() => {
 		if (currentTrack) createTrackQrCode(currentTrack);
 	});
-
-	onDestroy(() => {
-		clearInterval(spotifyTokenInterval);
-	});
 </script>
 
 <main
-	id="main"
 	class="p-10 h-screen transition-all duration-500 {isTrackPlaying
 		? 'opacity-100'
 		: 'opacity-0'}"
+	bind:this={mainEl}
 >
 	<div
 		on:click={() => {
@@ -163,7 +157,10 @@
 				</div>
 			</div>
 
-			<canvas id="qr-code" class="absolute bottom-0 right-0 m-10 rounded-lg" />
+			<canvas
+				class="absolute bottom-0 right-0 m-10 rounded-lg"
+				bind:this={canvasEl}
+			/>
 		{/if}
 	</div>
 </main>
