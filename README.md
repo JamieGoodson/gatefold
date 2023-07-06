@@ -33,30 +33,30 @@ or anywhere.
 ### Production
 
 - Run `npm run build`
-- Run `node build/index.js`
+- Run `npm run serve`
 
 The server should now be running! 🎉
 
-Direct your device's browser to your Raspberry Pi's IP and port `3000`
+Direct your device's browser to your Raspberry Pi's IP and port `8080`
 (or wherever you're hosting the app) to view Gatefold 🙂
 
-For example `http://192.168.1.143:3000/`
+For example `http://192.168.1.143:8080/`
 
 ### Run as a service (recommended)
 
 To keep the app running forever, it's best to run Gatefold as a service on the Raspberry Pi. To do this:
 
 - Run `npm run build`
-- Edit the `ExecStart` path to point to the right place (ie the full path to this directory + `/build/index.js`)
+- Edit the `ExecStart` path to point to the right place (ie the full path to this directory)
 - Run `cp gatefold.service /lib/systemd/system/`
 - Run `sudo systemctl start gatefold`
 
 This will start the Gatefold service and run in the background. It'll also start automatically on system startup.
 
-Direct your device's browser to your Raspberry Pi's IP and port `3000`
+Direct your device's browser to your Raspberry Pi's IP and port `8080`
 (or wherever you're hosting the app) to view Gatefold 🙂
 
-For example `http://192.168.1.143:3000/`
+For example `http://192.168.1.143:8080/`
 
 ## Part B - The Raspotify Script
 

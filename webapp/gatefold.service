@@ -6,7 +6,7 @@ After=network.target
 [Service]
 Type=simple
 User=pi
-ExecStart=node /home/pi/projects/gatefold/webapp/build/index.js
+ExecStart=/bin/bash -c "cd /home/pi/projects/gatefold/webapp && npm run serve"
 Restart=on-failure
 
 [Install]
