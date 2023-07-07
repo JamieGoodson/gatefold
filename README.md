@@ -69,11 +69,12 @@ This sends an event to the browser app to let it know that something happened.
 - From repo root: `cd raspotify/`
 - Run `npm install`
 - Copy `.env.example` to `.env` and fill in the values. The MQTT values should match those in the web app.
+- Run `chmod +x gatefold.sh`
 
 Add this to your Raspotify config file (`/etc/raspotify/conf`):
 
 ```
-LIBRESPOT_ONEVENT="bash -c 'cd /home/pi/path/to/gatefold/raspotify/ && npm run gatefold'"
+LIBRESPOT_ONEVENT="./path/to/gatefold/raspotify/gatefold.sh"
 ```
 
 ### Part 2 - The Raspotify service
