@@ -68,12 +68,12 @@ This sends an event to the browser app to let it know that something happened.
 - Ensure Node is installed system-wide on your Raspberry Pi (nvm won't do)
 - From repo root: `cd raspotify/`
 - Run `npm install`
-- Configure the `topic` and `brokerUrl` in `gatefold.js`
+- Copy `.env.example` to `.env` and fill in the values. The MQTT values should match those in the web app.
 
 Add this to your Raspotify config file (`/etc/raspotify/conf`):
 
 ```
-LIBRESPOT_ONEVENT="node /home/pi/path/to/gatefold/raspotify/gatefold.js"
+LIBRESPOT_ONEVENT="bash -c 'cd /home/pi/path/to/gatefold/raspotify/ && npm run gatefold'"
 ```
 
 ### Part 2 - The Raspotify service
@@ -98,7 +98,7 @@ app should respond to these events.
 
 ### Dev
 
-- Run `npm run dev` to publish a test event.
+- Run `npm run gatefold` to publish an event (you should set `IS_DEV="true" in your .env)
 
 If the browser app is configured and running correctly, you should see it display a track.
 If not, try opening the browser console and check if it's receiving any

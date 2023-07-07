@@ -2,13 +2,15 @@
   "name": "raspberrypi",
   "version": "1.0.0",
   "description": "",
-  "main": "main.js",
+  "main": "gatefold.js",
   "scripts": {
-    "dev": "DEV_MODE=true node ./main.js"
+    "gatefold": "node ./gatefold.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "dotenv": "^16.3.1",
     "mqtt": "^4.3.7"
-  }
+  },
+  "type": "module"
 }

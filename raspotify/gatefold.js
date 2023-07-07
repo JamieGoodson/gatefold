@@ -1,29 +1,35 @@
-var mqtt = require('mqtt');
+import "dotenv/config";
+import mqtt from "mqtt";
 
-var topic = '27b/librespot/playerEvent';
-var brokerUrl = 'ws://broker.emqx.io:8083/mqtt';
+const topic = process.env.MQTT_TOPIC;
+const brokerUrl = process.env.MQTT_BROKER_URL;
+const isDev = process.env.IS_DEV === "true";
 
-var client = mqtt.connect(brokerUrl);
+if (!topic || !brokerUrl) {
+  console.log("Some required env variables are missing");
+}
 
-client.on('connect', function () {
-	console.log('MQTT: Connected');
+const client = mqtt.connect(brokerUrl);
 
-	var message;
-	if (process.env.DEV_MODE) {
-		message = {
-			playerEvent: 'playing',
-			trackId: '2sCaihW0VlDKecbUgMSzRY'
-		};
-	} else {
-		message = {
-			playerEvent: process.env.PLAYER_EVENT,
-			oldTrackId: process.env.OLD_TRACK_ID,
-			trackId: process.env.TRACK_ID
-		};
-	}
+client.on("connect", function () {
+  console.log("MQTT: Connected");
 
-	client.publish(topic, JSON.stringify(message));
-	console.log('MQTT: Published');
-	console.log(message);
-	client.end();
+  let message;
+  if (isDev) {
+    message = {
+      playerEvent: "playing",
+      trackId: "2sCaihW0VlDKecbUgMSzRY",
+    };
+  } else {
+    message = {
+      playerEvent: process.env.PLAYER_EVENT,
+      oldTrackId: process.env.OLD_TRACK_ID,
+      trackId: process.env.TRACK_ID,
+    };
+  }
+
+  client.publish(topic, JSON.stringify(message));
+  console.log("MQTT: Published");
+  console.log(message);
+  client.end();
 });
