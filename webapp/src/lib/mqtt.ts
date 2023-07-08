@@ -7,7 +7,8 @@ type PlayerEvent =
 	| 'playing'
 	| 'changed'
 	| 'paused'
-	| 'volume_set';
+	| 'volume_set'
+	| 'preloading';
 
 export interface PlayerEventMessage {
 	playerEvent: PlayerEvent;

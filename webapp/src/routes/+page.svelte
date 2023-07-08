@@ -24,8 +24,6 @@
 	let mqClient: MqttClient;
 	let noSleep: NoSleep | null;
 
-	const ONE_HOUR = 3600 * 1000;
-	const ONE_MINUTE = 60 * 1000;
 	const BG_FALLBACK_COLOR = colors.neutral[900];
 
 	function goFullscreen() {
@@ -140,7 +138,7 @@
 		{#if currentTrack}
 			<div class="flex w-1/2 justify-end">
 				<img
-					class="w-full max-w-md rounded-lg mb-2 shadow-md"
+					class="w-full max-w-md rounded-xl mb-2 shadow-md"
 					src={currentTrack.albumImages[0]}
 					alt="album cover"
 				/>
