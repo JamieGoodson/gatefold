@@ -2,110 +2,81 @@
 
 <img src="https://github.com/JamieGoodson/gatefold/assets/4729966/74e448fe-f04d-4e6f-b665-45d1faf62c67" width="600">
 
-## Prerequisites
+Display the currently playing Spotify track. Made for the Raspberry Pi.
 
-Node >= v18.x (currently LTS) must be installed system-wide. To check your node version,
-run both `node -v` **and** `sudo node -v` (to confirm the same version for all users).
+## Features
 
-If you don't have it installed, you can run:
+- ✅ Displays currently playing track
+- ✅ Suitable for communal areas where lots of different people connect to Raspotify daily
+- ✅ QR code takes you directly to the song on the Spotify app
+- ✅ No login required
 
-```
-curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-sudo apt install -y nodejs
-```
+## Why Gatefold?
 
-## Part A - The Web App
+Gatefold is for individuals, organizations, or households with communal areas. Other solutions
+like Gatefold exist, but require each user to authorize with their Spotify account.
+With Gatefold it doesn't matter who's connected - **no login required!**
 
-The web app is what displays the track info. It uses a pub/sub model to listen for messages
-from the Raspberry Pi/Raspotify. It can be served either from the Raspberry Pi itself
-or anywhere.
+---
 
-### Prerequisites
+# Installation
 
-- From repo root: `cd webapp/`
-- Copy `.env.example` to `.env` and fill in the values. The MQTT values should match those in the Raspotify script.
-- Run `npm install`
+## Part 1 - Web App Setup
 
-### Dev
+### 1. Generate Spotify client credentials
 
-- Run `npm run dev`
+Login to the [Spotify Dashboard](https://developer.spotify.com/dashboard) and hit 'Create app'. Call the app 'Gatefold', give it some description, and set the 'Redirect URI' to `example.com` (we don't need this but it's a required field).
 
-### Production
+Leave the other settings blank. Click 'Settings' on the app's page and make a note of the 'Client ID' and 'Client secret'.
 
-- Run `npm run build`
-- Run `npm run serve`
+### 2. Fork this repo
 
-The server should now be running! 🎉
+Click the 'Fork' button at the top of this page to copy this repo to your account.
 
-Direct your device's browser to your Raspberry Pi's IP and port `8080`
-(or wherever you're hosting the app) to view Gatefold 🙂
+### 3. Create a site on Netlify
 
-For example `http://192.168.1.143:8080/`
+Create an account on [Netlify](https://www.netlify.com/) if you don't already have one.
 
-### Run as a service (recommended)
+Login, go to the 'Team overview' tab, select 'Add new site' > 'Import an existing project' > 'Deploy with GitHub'. If this is your first Netlify site, it'll ask you to authorise your GitHub account. Once authorised, select your forked Gatefold project.
 
-To keep the app running forever, it's best to run Gatefold as a service on the Raspberry Pi. To do this:
+Set the 'Base directory' to `webapp`, leave all other settings as whatever Netlify sets.
 
-- Run `npm run build`
-- Edit the `ExecStart` path to point to the right place (ie the full path to this directory)
-- Run `cp gatefold.service /lib/systemd/system/`
-- Run `sudo systemctl start gatefold`
+Under 'Environment variables' create a new variable for each of the following:
 
-This will start the Gatefold service and run in the background. It'll also start automatically on system startup.
+- `VITE_MQTT_BROKER_URL`: `wss://broker.emqx.io:8084/mqtt`
+- `VITE_MQTT_TOPIC`: `[Your GitHub username]/raspotify/playerEvent`
+- `VITE_SPOTIFY_CLIENT_ID`: `[Your Spotify Client ID]`
+- `VITE_SPOTIFY_CLIENT_SECRET`: `[Your Spotify Client Secret]`
 
-Direct your device's browser to your Raspberry Pi's IP and port `8080`
-(or wherever you're hosting the app) to view Gatefold 🙂
+Replace the values in the square brackets (incl. the brackets) with your values.
 
-For example `http://192.168.1.143:8080/`
+Hit the Deploy button.
 
-## Part B - The Raspotify Script
+### 4. View Gatefold
 
-A node script that lives on your Raspberry Pi and runs whenever the Raspotify (Librespot) event hook fires (eg when the Raspotify player changed songs).
-This sends an event to the browser app to let it know that something happened.
+On your tablet or other device, navigate to the Netlify URL of your site (it'll be a black screen for now). Tap anywhere on the screen once to make it go fullscreen (this will also prevent the device from sleeping). Bookmark this URL if you wish.
 
-### Part 1 - The event script
+Done!
 
-- Ensure Node is installed system-wide on your Raspberry Pi (nvm won't do)
-- From repo root: `cd raspotify/`
-- Run `npm install`
-- Copy `.env.example` to `.env` and fill in the values. The MQTT values should match those in the web app.
-- Run `chmod +x gatefold.sh`
+## Part 2 - Raspotify Setup
 
-Add this to your Raspotify config file (`/etc/raspotify/conf`):
+Install [nvm](https://github.com/nvm-sh/nvm#installing-and-updating) on your Raspberry Pi.
+
+Clone this repo onto your Raspberry Pi (eg in ~/). Then run:
 
 ```
-LIBRESPOT_ONEVENT="./path/to/gatefold/raspotify/gatefold.sh"
+cd gatefold/raspotify
+./setup.sh
+sudo systemctl daemon-reload && sudo systemctl restart raspotify
 ```
 
-### Part 2 - The Raspotify service
+Follow the setup instructions.
 
-At some point the Raspotify service was updated to only run in a high security state with very few permissions.
-This prevents our script from being able to run (see [official discussion thread](https://github.com/dtcooper/raspotify/issues/500) on this issue). To fix this, we can overwrite the default
-Raspotify service with our own one that has more freedom and runs under the `pi` user.
+Done! Raspotify will now send player events to the Netlify site we created earlier.
 
-Caution: Run at your own risk.
+# Note
 
-- Backup the existing service: `sudo mv /lib/systemd/system/raspotify.service.backup`
-- Copy our service in place of the original one: `sudo cp raspotify.service  /lib/systemd/system/`
-- Reload systemd files and restart the Raspotify service: `sudo systemctl daemon-reload && sudo systemctl restart raspotify`
-
-Raspotify should now be sending out MQTT messages whenever you pause/play (etc) a track.
-You can confirm this by following the Raspotify logs in realtime:
-
-`sudo journalctl --follow -u raspotify`
-
-You should see it publish a MQTT message on each event. That's it! Your browser
-app should respond to these events.
-
-### Dev
-
-- Run `npm run gatefold` to publish an event (you should set `IS_DEV="true" in your .env)
-
-If the browser app is configured and running correctly, you should see it display a track.
-If not, try opening the browser console and check if it's receiving any
-messages/showing any errors.
-
-## Useful links
-
-- https://github.com/dtcooper/raspotify/issues/171#issuecomment-507423901
-- https://github.com/librespot-org/librespot/blob/aa880f8888226a8e5fc6e1e54dfb7cf58176ac95/src/player_event_handler.rs
+By default, a free public service ([broker.emqx.io](broker.emqx.io)) is used to
+communicate between the Raspberry Pi and your Gatefold site. This means the
+Spotify track IDs played on your Raspotify are, in theory, publicy visible.
+If you'd prefer to host your own MQTT service, you may do so.

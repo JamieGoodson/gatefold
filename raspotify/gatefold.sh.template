@@ -1,0 +1,4 @@
+#!/bin/bash
+
+cd {script_path}
+{node_path} gatefold.js
