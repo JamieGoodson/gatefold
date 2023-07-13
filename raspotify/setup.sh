@@ -6,6 +6,7 @@ script_path=$(dirname "$script")
 ### Event script setup ###
 . ~/.nvm/nvm.sh
 nvm install
+nvm use
 npm install
 node_path=$(which node)
 
