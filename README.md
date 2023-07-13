@@ -39,7 +39,10 @@ Create an account on [Netlify](https://www.netlify.com/) if you don't already ha
 
 Login, go to the 'Team overview' tab, select 'Add new site' > 'Import an existing project' > 'Deploy with GitHub'. If this is your first Netlify site, it'll ask you to authorise your GitHub account. Once authorised, select your forked Gatefold project.
 
-Set the 'Base directory' to `webapp`, leave all other settings as whatever Netlify sets.
+Set the below settings (leave other fields as blank/whatever Netlify sets):
+- Base directory: `webapp`
+- Build command: `npm run build`
+- Publish directory: `webapp/build`
 
 Under 'Environment variables' create a new variable for each of the following:
 
@@ -62,7 +65,7 @@ Done!
 
 Install [nvm](https://github.com/nvm-sh/nvm#installing-and-updating) on your Raspberry Pi.
 
-Clone this repo onto your Raspberry Pi (eg in ~/). Then run:
+Clone this repo onto your Raspberry Pi (eg in ~/). Then run (**don't forget the last line!**):
 
 ```
 cd gatefold/raspotify
@@ -70,7 +73,7 @@ cd gatefold/raspotify
 sudo systemctl daemon-reload && sudo systemctl restart raspotify
 ```
 
-Follow the setup instructions.
+Follow the setup instructions. 
 
 Done! Raspotify will now send player events to the Netlify site we created earlier.
 
